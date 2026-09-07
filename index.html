@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>🎾 Allenamento Giovanni</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f5f7fa;color:#111827}
+main{max-width:760px;margin:auto;padding:20px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+h1{font-size:25px;margin:0}.muted{color:#6b7280;font-size:14px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.tabs button,.action{border:1px solid #d1d5db;background:white;border-radius:12px;padding:11px 14px;font-weight:600}
+.tabs button.active,.action.primary{background:#111827;color:white}
+.card{background:white;border:1px solid #e5e7eb;border-radius:18px;padding:16px;margin:12px 0}
+.exercise{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #eee}
+.exercise:last-child{border-bottom:0}.exercise input{width:21px;height:21px}.done{text-decoration:line-through;opacity:.5}
+.timer{font-size:42px;font-weight:800;text-align:center;margin:8px}.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1;min-width:90px}
+button{cursor:pointer}.progress{height:10px;background:#e5e7eb;border-radius:20px;overflow:hidden}.bar{height:100%;background:#111827;width:0}
+a{color:inherit}
+</style>
+</head>
+<body><main>
+<div class="top"><div><h1>🎾 Allenamento Giovanni</h1><div class="muted">4 settimane • casa + tennis</div></div><a class="action" target="_blank" href="https://open.spotify.com/playlist/2kUwvYgrbeNFjuVw1c73WE">🎵 Spotify</a></div>
+<div class="tabs" id="weeks"></div>
+<div class="tabs" id="days"></div>
+<div class="card" id="content"></div>
+<div class="card"><h2>⏱ Timer recupero</h2><div class="timer" id="timer">00:45</div><div class="row"><button class="action primary" id="start">▶ Avvia</button><button class="action" id="reset">↺ Reset</button><button class="action" data-s="30">30s</button><button class="action" data-s="45">45s</button><button class="action" data-s="60">60s</button></div></div>
+<div class="card"><h2>📈 Progresso</h2><div class="progress"><div class="bar" id="bar"></div></div><p id="pct" class="muted">0% completato</p></div>
+<div class="card"><b>🆘 Solo 15 minuti?</b><p class="muted">Lun: 2 push-up + 2 plank + 2 dead bug. Mer: 2 squat + 2 affondi/gamba + 3×15s split step/shuffle. Ven: 2 push-up + 2 squat + 2 plank + 2 reverse crunch.</p></div>
+<div class="card"><h2>🎥 Video tecnica</h2><p><a target="_blank" href="https://www.youtube.com/watch?v=bxn9FBrt4-A">Dead bug — video</a></p><p><a target="_blank" href="https://www.head.com/en_US/tennis/tennis-footwork-drills">Footwork tennis — HEAD</a></p><p><a target="_blank" href="https://www.youtube.com/watch?v=ufjvjxrGyFM">Reverse lunge — video</a></p></div>
+</main>
+<script>
+const data={
+lun:{t:"Lunedì — Petto + Core",x:[["Riscaldamento","4 min"],["Push-up","3 × 8–15"],["Push-up inclinati","2 × 10–15"],["Plank","3 × 30–45s"],["Crunch","3 × 15–20"],["Dead bug","3 × 8–10/lato"],["Side plank","2 × 25–35s/lato"]]},
+mer:{t:"Mercoledì — Gambe + Footwork",x:[["Riscaldamento","5 min"],["Squat","3 × 10–15"],["Affondo indietro","2 × 8/gamba"],["Split squat","2 × 8/gamba"],["Calf raise","2 × 15–20"],["Squat jump","3 × 5"],["Skater jump","3 × 6/lato"],["Split step + lateral shuffle","4 × 15–20s"]]},
+ven:{t:"Venerdì — Full Body + Core",x:[["Push-up","3 × 8–15"],["Squat","2 × 12–15"],["Affondo indietro","2 × 8/gamba"],["Plank","3 × 40–60s"],["Reverse crunch","3 × 12–15"],["Bicycle crunch","2 × 16–20"],["Superman","2 × 12–15"]]},
+ten:{t:"🎾 Tennis — Martedì 18:30 + Domenica 09:00",x:[["Riscaldamento","5–10 min"],["Split step","3–5 min"],["Spostamenti laterali","5 min"],["Palla corta → recupero","5 min"],["Tecnica / gioco","30–40 min"],["Defaticamento","5 min"]]}
+};
+let week=1,day="lun",secs=45,interval=null;
+const $=id=>document.getElementById(id);
+for(let i=1;i<=4;i++){let b=document.createElement("button");b.textContent="Settimana "+i;b.onclick=()=>{week=i;render()};$("weeks").append(b)}
+[["lun","Lun"],["mer","Mer"],["ven","Ven"],["ten","🎾 Tennis"]].forEach(([k,n])=>{let b=document.createElement("button");b.textContent=n;b.onclick=()=>{day=k;render()};$("days").append(b)});
+function render(){
+$("content").innerHTML="<h2>"+data[day].t+"</h2>"+data[day].x.map((e,i)=>`<label class="exercise"><input type="checkbox" data-i="${i}"><span><b>${e[0]}</b><br><span class="muted">${e[1]}</span></span></label>`).join("")+`<p class="muted">Settimana ${week}/4 • Giovedì: mobilità facoltativa • Sabato: riposo</p>`;
+document.querySelectorAll(".exercise input").forEach(c=>c.onchange=()=>{c.parentElement.classList.toggle("done",c.checked);update()});update();
+}
+function update(){let a=[...document.querySelectorAll(".exercise input")],n=a.filter(x=>x.checked).length,p=a.length?Math.round(n/a.length*100):0;$("bar").style.width=p+"%";$("pct").textContent=p+"% completato"}
+function show(){let m=Math.floor(secs/60),s=secs%60;$("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")}
+$("start").onclick=()=>{if(interval){clearInterval(interval);interval=null;$("start").textContent="▶ Avvia";return} $("start").textContent="Ⅱ Pausa";interval=setInterval(()=>{secs--;show();if(secs<=0){clearInterval(interval);interval=null;$("start").textContent="▶ Avvia";}},1000)}
+$("reset").onclick=()=>{clearInterval(interval);interval=null;secs=45;show();$("start").textContent="▶ Avvia"}
+document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{clearInterval(interval);interval=null;secs=+b.dataset.s;show();$("start").textContent="▶ Avvia"})
+render();show();
+</script></body></html>
